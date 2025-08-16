@@ -3,6 +3,7 @@ import express, { Request, Response, NextFunction, ErrorRequestHandler } from 'e
 import mongoose from 'mongoose';
 import authRouter from './routers/auth.js';
 import userRouter from './routers/user.js';
+import hubspotRouter from './routers/hubspot.js';
 
 const app = express();
 const PORT: number = Number(config.PORT);
@@ -20,6 +21,7 @@ app.use((req: Request, res: Response, next: NextFunction): void => {
 // Application Routes
 app.use('/api/auth', authRouter);
 app.use('/api/users', userRouter);
+app.use('/api/hubspot', hubspotRouter);
 
 app.get('/', (req: Request, res: Response): void => {
   res.json({

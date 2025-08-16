@@ -13,6 +13,7 @@ interface Config {
     JWT_SECRET: string | undefined;
     JWT_EXPIRES_IN: string;
     JWT_REFRESH_EXPIRES_IN: string;
+    HUBSPOT_BASE: string | undefined;
 }
 
 const config: Config = {
@@ -26,7 +27,8 @@ const config: Config = {
     MONGO_CONNECTION_STRING: process.env.MONGO_CONNECTION_STRING,
     JWT_SECRET: process.env.JWT_SECRET,
     JWT_EXPIRES_IN: process.env.JWT_EXPIRES_IN || '7d',
-    JWT_REFRESH_EXPIRES_IN: process.env.JWT_REFRESH_EXPIRES_IN || '30d'
+    JWT_REFRESH_EXPIRES_IN: process.env.JWT_REFRESH_EXPIRES_IN || '30d',
+    HUBSPOT_BASE: process.env.HUBSPOT_BASE || 'https://api.hubapi.com'
 };
 
 const errors: string[] = [];
