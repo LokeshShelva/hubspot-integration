@@ -1,19 +1,6 @@
 import { z } from "zod";
 
-/**
- * Schema for creating a HubSpot contact
- */
-export const createContactSchema = z.object({
-  contact_owner: z
-    .string()
-    .min(1, "Contact owner is required")
-    .max(100, "Contact owner must be less than 100 characters")
-    .trim(),
-  email: z.email("Invalid email format").trim(),
-  firstname: z
-    .string()
-    .max(50, "First name must be less than 50 characters")
-    .trim(),
+export const customContactProperties = z.object({
   candidate_experience: z
     .number()
     .min(0, "Candidate experience must be a positive number"),
@@ -28,6 +15,26 @@ export const createContactSchema = z.object({
     .string()
     .max(100, "Past company name must be less than 100 characters")
     .trim(),
+});
+
+/**
+ * Schema for partial property updates - makes all fields optional
+ */
+export const partialContactPropertySchema = customContactProperties.partial();
+
+/**
+ * Schema for creating a HubSpot contact
+ */
+export const createContactSchema = z.object({
+  contact_owner: z
+    .string()
+    .min(1, "Contact owner is required")
+    .max(100, "Contact owner must be less than 100 characters")
+    .trim(),
+  properties: z.object({
+    email: z.email("Invalid email format").trim(),
+    firstname: z.string().max(100, "First name must be less than 100 characters").trim(),
+  }).merge(customContactProperties),
 });
 
 /**
@@ -94,16 +101,30 @@ export const propertySchema = z.object({
 });
 
 export const createCustomPropertySchema = z.object({
-    inputs: z.array(propertySchema).min(1, "At least one property is required"),
+  inputs: z.array(propertySchema).min(1, "At least one property is required"),
+});
+
+export const updateContactDetailsSchema = z.object({
+  email: z.email("Invalid email format").trim(),
+  properties: partialContactPropertySchema,
 });
 
 // Export type inference for use in controllers
 export type CreateContactInput = z.infer<typeof createContactSchema>;
-export type propertyInput = z.infer<typeof propertySchema>;
-export type CreateCustomPropertyInput = z.infer<typeof createCustomPropertySchema>;
+export type PropertyInput = z.infer<typeof propertySchema>;
+export type PartialContactPropertyInput = z.infer<
+  typeof partialContactPropertySchema
+>;
+export type CreateCustomPropertyInput = z.infer<
+  typeof createCustomPropertySchema
+>;
+export type UpdateContactDetailsInput = z.infer<
+  typeof updateContactDetailsSchema
+>;
 
 export default {
   createContactSchema,
   propertySchema,
-  createCustomPropertySchema
+  createCustomPropertySchema,
+  updateContactDetailsSchema,
 };

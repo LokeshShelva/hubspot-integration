@@ -4,6 +4,8 @@ import {
   createContactSchema,
   CreateCustomPropertyInput,
   createCustomPropertySchema,
+  UpdateContactDetailsInput,
+  updateContactDetailsSchema,
   type CreateContactInput,
 } from "../schemas/hubspot.js";
 import { authenticateToken } from "../middleware/auth.js";
@@ -90,4 +92,42 @@ router.post(
   }
 );
 
+router.patch(
+  "/contacts/properties",
+  validateSchema(updateContactDetailsSchema),
+  async (req: Request, res: Response) => {
+    try {
+      const { email, properties } = req.body as UpdateContactDetailsInput;
+      const username = req.user?.username;
+
+      if (!username) {
+        return res.status(401).json({
+          success: false,
+          error: "Authentication required",
+          message: "You must be logged in to create a contact",
+        });
+      }
+
+      const result = await hubspotService.updateContactDetails(
+        email,
+        properties,
+        username
+      );
+      return res.status(200).json({
+        success: true,
+        message: "Custom properties updated successfully",
+        data: {
+          properties: result,
+        },
+      });
+    } catch (error: any) {
+      console.error("Create custom properties error:", error);
+      return res.status(500).json({
+        success: false,
+        error: "Failed to create custom properties",
+        message: error.message || "An unexpected error occurred",
+      });
+    }
+  }
+);
 export default router;

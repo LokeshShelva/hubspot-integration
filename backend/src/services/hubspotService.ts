@@ -3,6 +3,7 @@ import Auth from "../models/auth.js";
 import {
   CreateContactInput,
   CreateCustomPropertyInput,
+  PartialContactPropertyInput,
 } from "../schemas/hubspot";
 import AuthService from "./authService.js";
 
@@ -14,6 +15,11 @@ class HubspotService {
   private baseUrl: string;
   private authService: AuthService;
 
+  /**
+   * Initialize HubspotService with authentication service
+   * @param authService - Service for handling authentication operations
+   * @throws {Error} When HUBSPOT_BASE is not configured
+   */
   constructor(authService: AuthService) {
     if (!config.HUBSPOT_BASE) {
       throw new Error("HUBSPOT_BASE is not defined in the configuration");
@@ -23,6 +29,13 @@ class HubspotService {
     this.authService = authService;
   }
 
+  /**
+   * Creates a new contact in HubSpot
+   * @param contactData - Contact information including owner, email, name, and custom properties
+   * @param username - Username of the authenticated user
+   * @returns Promise containing the created contact details with id and properties
+   * @throws {HubspotServiceError} When API request fails or user/owner not found
+   */
   public async createContact(
     contactData: CreateContactInput,
     username: string
@@ -39,12 +52,13 @@ class HubspotService {
       "Content-Type": "application/json",
     };
 
-    const { contact_owner: _, ...contactProperties } = contactData;
-    
+    // @ts-ignore
+    const { _, properties } = contactData;
+
     const payload = {
       properties: {
         hubspot_owner_id: contact_owner.id,
-        ...contactProperties,
+        ...properties,
       },
     };
 
@@ -70,11 +84,19 @@ class HubspotService {
     return {
       id: createdContact.id,
       hubspot_owner_id: contact_owner.id,
-      email: contactData.email,
-      firstName: contactData.firstname,
+      email: contactData.properties.email,
+      firstName: contactData.properties.firstname,
     };
   }
 
+  /**
+   * Creates custom properties for a specific HubSpot object type in batch
+   * @param properties - Array of property definitions with name, label, type, etc.
+   * @param objectType - HubSpot object type (e.g., 'contacts', 'companies', 'deals')
+   * @param username - Username of the authenticated user
+   * @returns Promise containing the batch creation result from HubSpot API
+   * @throws {HubspotServiceError} When API request fails or authentication issues occur
+   */
   public async createCustomProperties(
     properties: CreateCustomPropertyInput,
     objectType: string,
@@ -107,6 +129,57 @@ class HubspotService {
     return result;
   }
 
+  /**
+   * Updates contact details in HubSpot using email as identifier
+   * @param email - Email address of the contact to update
+   * @param properties - Partial property object with fields to update
+   * @param username - Username of the authenticated user
+   * @returns Promise containing the updated contact details from HubSpot API
+   * @throws {HubspotServiceError} When API request fails or authentication issues occur
+   */
+  public async updateContactDetails(
+    email: string,
+    properties: PartialContactPropertyInput,
+    username: string
+  ) {
+    const accessToken = await this.getAccessToken(username);
+
+    const apiUrl = `${
+      this.baseUrl
+    }/crm/v3/objects/contacts/${encodeURIComponent(email)}?idProperty=email`;
+    const headers = {
+      Authorization: `Bearer ${accessToken}`,
+      "Content-Type": "application/json",
+    };
+
+    const response = await fetch(apiUrl, {
+      method: "PATCH",
+      headers: headers,
+      body: JSON.stringify({ properties }),
+    });
+
+    if (!response.ok) {
+      const errorText: any = await response.json();
+      const error: HubspotServiceError = new Error(
+        `HubSpot API error: ${response.status} - ${
+          errorText.message || "Unknown error"
+        }`
+      );
+      error.code = "HUBSPOT_API_ERROR";
+      throw error;
+    }
+
+    const result: any = await response.json();
+    return result;
+  }
+
+  /**
+   * Retrieves and decrypts the access token for a user
+   * @param username - Username to lookup in the database
+   * @returns Promise containing the decrypted access token
+   * @throws {Error} When user is not found or token decryption fails
+   * @private
+   */
   private async getAccessToken(username: string): Promise<string> {
     const user = await (Auth as any).findByUsername(username);
     if (!user) {
@@ -121,6 +194,15 @@ class HubspotService {
     return access_token;
   }
 
+  /**
+   * Fetches HubSpot contact owner details by email address
+   * @param email - Email address of the contact owner to lookup
+   * @param username - Username of the authenticated user making the request
+   * @returns Promise containing owner details (id, email, firstName, lastName)
+   * @throws {HubspotServiceError} When API request fails
+   * @throws {Error} When no contact owner is found for the provided email
+   * @private
+   */
   private async getHubspotContactOwnerDetail(email: string, username: string) {
     const accessToken = await this.getAccessToken(username);
 
