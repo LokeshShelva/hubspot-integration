@@ -2,6 +2,7 @@
 // Import config first to validate environment variables
 import { config } from './config.js';
 import express from 'express';
+import mongoose from 'mongoose';
 import authRouter from './routers/auth.js';
 
 const app = express();
@@ -20,7 +21,6 @@ app.use((req, res, next) => {
 // Mount OAuth routes
 app.use('/auth', authRouter);
 
-// Routes
 app.get('/', (req, res) => {
   res.json({
     message: 'Welcome to the HubSpot Integration API',
@@ -35,14 +35,6 @@ app.get('/health', (req, res) => {
     status: 'healthy',
     uptime: process.uptime(),
     timestamp: new Date().toISOString()
-  });
-});
-
-app.post('/api/hubspot/contacts', (req, res) => {
-  res.json({
-    success: true,
-    message: 'HubSpot contact creation endpoint - to be implemented',
-    data: null
   });
 });
 
@@ -63,15 +55,53 @@ app.use((err, req, res, next) => {
   });
 });
 
-// Start the server
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
+async function connectToMongoDB() {
+  try {
+    await mongoose.connect(config.MONGO_CONNECTION_STRING, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    });
+    console.log('✅ Connected to MongoDB successfully');
+    return true;
+  } catch (error) {
+    console.error('MongoDB connection error:', error);
+    process.exit(1);
+  }
+}
+
+// Handle MongoDB connection events
+mongoose.connection.on('error', (error) => {
+  console.error('MongoDB connection error:', error);
 });
 
-const authUrl =
-  'https://app.hubspot.com/oauth/authorize' +
-  `?client_id=${encodeURIComponent(config.CLIENT_ID)}` +
-  `&scope=${encodeURIComponent(config.SCOPES)}` +
-  `&redirect_uri=${encodeURIComponent(config.REDIRECT_URI)}`
+mongoose.connection.on('disconnected', () => {
+  console.log('MongoDB disconnected');
+});
 
-console.log(`Authorization URL: ${authUrl}`);
+async function startServer() {
+  console.log('Starting HubSpot Integration Server...');
+  const mongoConnected = await connectToMongoDB();
+  
+  app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+    console.log(`API available at: http://localhost:${PORT}`);
+    console.log(`Health check: http://localhost:${PORT}/health`);
+
+    if (config.CLIENT_ID && config.SCOPES && config.REDIRECT_URI) {
+      const authUrl =
+        'https://app.hubspot.com/oauth/authorize' +
+        `?client_id=${encodeURIComponent(config.CLIENT_ID)}` +
+        `&scope=${encodeURIComponent(config.SCOPES)}` +
+        `&redirect_uri=${encodeURIComponent(config.REDIRECT_URI)}`;
+
+      console.log(`Authorization URL: ${authUrl}`);
+    } else {
+      console.log('OAuth configuration incomplete - check your .env file');
+    }
+  });
+}
+
+startServer().catch((error) => {
+  console.error('Failed to start server:', error);
+  process.exit(1);
+});
