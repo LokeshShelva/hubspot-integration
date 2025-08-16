@@ -9,7 +9,10 @@ const config = {
     SCOPES: process.env.SCOPES,
     TOKEN_URL: process.env.TOKEN_URL,
     ENCRYPTION_KEY: process.env.ENCRYPTION_KEY,
-    MONGO_CONNECTION_STRING: process.env.MONGO_CONNECTION_STRING
+    MONGO_CONNECTION_STRING: process.env.MONGO_CONNECTION_STRING,
+    JWT_SECRET: process.env.JWT_SECRET,
+    JWT_EXPIRES_IN: process.env.JWT_EXPIRES_IN || '7d',
+    JWT_REFRESH_EXPIRES_IN: process.env.JWT_REFRESH_EXPIRES_IN || '30d'
 };
 
 let errors = [];

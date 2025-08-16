@@ -1,17 +1,18 @@
 import express from "express";
 import { config } from "../config.js";
 import { AuthService } from "../services/authService.js";
+import { authenticateToken } from "../middleware/auth.js";
 
 const router = express.Router();
 const authService = new AuthService();
 
-// OAuth authorization URL endpoint
-router.get("/auth", (req, res) => {
+router.get("/generate", authenticateToken, (req, res) => {
   const authUrl =
     `https://app.hubspot.com/oauth/authorize?` +
     `client_id=${config.CLIENT_ID}&` +
     `redirect_uri=${encodeURIComponent(config.REDIRECT_URI)}&` +
-    `scope=contacts`;
+    `scope=${encodeURIComponent(config.SCOPES)}&` +
+    `state=${encodeURIComponent(req.user.username)}`
 
   res.json({
     success: true,
@@ -20,11 +21,9 @@ router.get("/auth", (req, res) => {
   });
 });
 
-// OAuth callback endpoint
 router.get("/callback", async (req, res) => {
-  const { code, error } = req.query;
+  const { code, state, error } = req.query;
 
-  // Handle OAuth error
   if (error) {
     console.error("OAuth error:", error);
     return res.status(400).json({
@@ -34,7 +33,6 @@ router.get("/callback", async (req, res) => {
     });
   }
 
-  // Handle missing authorization code
   if (!code) {
     return res.status(400).json({
       success: false,
@@ -43,10 +41,12 @@ router.get("/callback", async (req, res) => {
   }
 
   try {
-    await authService.createAccessToken(code, 'testuser');
+    // Use the authenticated user's username instead of 'testuser'
+    await authService.createAccessToken(code, state);
     return res.json({
       success: true,
       message: "Access token created successfully",
+      user: state
     })
 
   } catch (error) {
@@ -59,55 +59,26 @@ router.get("/callback", async (req, res) => {
   }
 });
 
-// // Token refresh endpoint
-// router.post('/refresh', async (req, res) => {
-//   const { refresh_token } = req.body;
-
-//   if (!refresh_token) {
-//     return res.status(400).json({
-//       success: false,
-//       error: 'Refresh token is required'
-//     });
-//   }
-
-//   try {
-//     const tokenResponse = await fetch('https://api.hubapi.com/oauth/v1/token', {
-//       method: 'POST',
-//       headers: {
-//         'Content-Type': 'application/x-www-form-urlencoded',
-//       },
-//       body: new URLSearchParams({
-//         grant_type: 'refresh_token',
-//         client_id: config.CLIENT_ID,
-//         client_secret: config.CLIENT_SECRET,
-//         refresh_token: refresh_token
-//       })
-//     });
-
-//     const tokenData = await tokenResponse.json();
-
-//     if (!tokenResponse.ok) {
-//       throw new Error(tokenData.message || 'Failed to refresh token');
-//     }
-
-//     res.json({
-//       success: true,
-//       message: 'Token refreshed successfully',
-//       data: {
-//         access_token: tokenData.access_token,
-//         refresh_token: tokenData.refresh_token,
-//         expires_in: tokenData.expires_in,
-//         token_type: tokenData.token_type
-//       }
-//     });
-//   } catch (error) {
-//     console.error("Token refresh error:", error);
-//     res.status(500).json({
-//       success: false,
-//       error: "Failed to refresh token",
-//       details: error.message,
-//     });
-//   }
-// });
+router.post('/refresh', authenticateToken, async (req, res) => {
+  try {
+    const refreshedTokens = await authService.refreshAccessToken(req.user.username);
+    
+    res.json({
+      success: true,
+      message: 'HubSpot tokens refreshed successfully',
+      data: {
+        expires_in: refreshedTokens.expires_in,
+        refreshed_at: refreshedTokens.refreshed_at
+      }
+    });
+  } catch (error) {
+    console.error("HubSpot token refresh error:", error);
+    res.status(500).json({
+      success: false,
+      error: "Failed to refresh HubSpot token",
+      details: error.message,
+    });
+  }
+});
 
 export default router;

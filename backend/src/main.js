@@ -1,9 +1,8 @@
-
-// Import config first to validate environment variables
 import { config } from './config.js';
 import express from 'express';
 import mongoose from 'mongoose';
 import authRouter from './routers/auth.js';
+import userRouter from './routers/user.js';
 
 const app = express();
 const PORT = config.PORT;
@@ -18,8 +17,9 @@ app.use((req, res, next) => {
   next();
 });
 
-// Mount OAuth routes
-app.use('/auth', authRouter);
+// Application Routes
+app.use('/api/auth', authRouter);
+app.use('/api/users', userRouter);
 
 app.get('/', (req, res) => {
   res.json({
@@ -80,24 +80,12 @@ mongoose.connection.on('disconnected', () => {
 
 async function startServer() {
   console.log('Starting HubSpot Integration Server...');
-  const mongoConnected = await connectToMongoDB();
+  await connectToMongoDB();
   
   app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
     console.log(`API available at: http://localhost:${PORT}`);
     console.log(`Health check: http://localhost:${PORT}/health`);
-
-    if (config.CLIENT_ID && config.SCOPES && config.REDIRECT_URI) {
-      const authUrl =
-        'https://app.hubspot.com/oauth/authorize' +
-        `?client_id=${encodeURIComponent(config.CLIENT_ID)}` +
-        `&scope=${encodeURIComponent(config.SCOPES)}` +
-        `&redirect_uri=${encodeURIComponent(config.REDIRECT_URI)}`;
-
-      console.log(`Authorization URL: ${authUrl}`);
-    } else {
-      console.log('OAuth configuration incomplete - check your .env file');
-    }
   });
 }
 

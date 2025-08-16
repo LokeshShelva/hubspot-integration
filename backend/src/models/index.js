@@ -1,9 +1,12 @@
 import Auth from './auth.js';
+import User from './user.js';
 
 export {
-  Auth
+  Auth,
+  User
 };
 
 export default {
-  Auth
-};
+  Auth,
+  User
+}

@@ -144,7 +144,8 @@ class AuthService {
         grant_type: 'refresh_token',
         client_id: this.clientId,
         client_secret: this.clientSecret,
-        refresh_token: decryptedRefreshToken
+        refresh_token: decryptedRefreshToken,
+        redirect_uri: this.redirectUri,
       }),
     });
 
