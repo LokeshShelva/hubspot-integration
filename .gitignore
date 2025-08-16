@@ -128,3 +128,4 @@ coverage/
 
 # PM2 ecosystem file
 ecosystem.config.js
+.vercel

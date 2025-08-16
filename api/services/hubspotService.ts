@@ -4,7 +4,7 @@ import {
   CreateContactInput,
   CreateCustomPropertyInput,
   PartialContactPropertyInput,
-} from "../schemas/hubspot";
+} from "../schemas/hubspot.js";
 import AuthService from "./authService.js";
 
 interface HubspotServiceError extends Error {
