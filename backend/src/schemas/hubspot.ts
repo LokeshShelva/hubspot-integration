@@ -15,6 +15,10 @@ export const customContactProperties = z.object({
     .string()
     .max(100, "Past company name must be less than 100 characters")
     .trim(),
+  candidate_number: z
+    .string()
+    .max(15, "Candidate number must be less than 15 characters")
+    .trim(),
 });
 
 /**
@@ -31,10 +35,15 @@ export const createContactSchema = z.object({
     .min(1, "Contact owner is required")
     .max(100, "Contact owner must be less than 100 characters")
     .trim(),
-  properties: z.object({
-    email: z.email("Invalid email format").trim(),
-    firstname: z.string().max(100, "First name must be less than 100 characters").trim(),
-  }).merge(customContactProperties),
+  properties: z
+    .object({
+      email: z.email("Invalid email format").trim(),
+      firstname: z
+        .string()
+        .max(100, "First name must be less than 100 characters")
+        .trim(),
+    })
+    .merge(customContactProperties),
 });
 
 /**

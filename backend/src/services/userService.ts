@@ -4,6 +4,7 @@ import { generateTokenPair, type TokenPair } from '../utils/jwt.js';
 interface UserData {
   username: string;
   password: string;
+  user_account_id: string;
 }
 
 interface UserCredentials {
@@ -33,11 +34,12 @@ class UserService {
    * @param userData - User registration data
    * @param userData.username - Username
    * @param userData.password - Password
+   * @param userData.user_account_id - User account ID from Hubspot
    * @returns Created user and tokens
    */
-  async createUser({ username, password }: UserData): Promise<CreateUserResponse> {
-    if (!username || !password) {
-      throw new Error('Username and password are required');
+  async createUser({ username, password, user_account_id }: UserData): Promise<CreateUserResponse> {
+    if (!username || !password || !user_account_id) {
+      throw new Error('Username, password, and user_account_id are required');
     }
 
     if (username.length < 3 || username.length > 50) {
@@ -57,7 +59,8 @@ class UserService {
 
     const user = new User({
       username: username.toLowerCase().trim(),
-      password
+      password,
+      user_account_id
     });
 
     await user.save();

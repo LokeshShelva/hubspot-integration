@@ -4,12 +4,12 @@ import mongoose from 'mongoose';
 import authRouter from './routers/auth.js';
 import userRouter from './routers/user.js';
 import hubspotRouter from './routers/hubspot.js';
+import webhookRouter from './routers/webhook.js';
 
 const app = express();
 const PORT: number = Number(config.PORT);
 
-// Middleware
-app.use(express.json()); // Parse JSON bodies
+// Middleware that should apply to all routes
 app.use(express.urlencoded({ extended: true })); // Parse URL-encoded bodies
 
 // Basic middleware for logging requests
@@ -18,10 +18,11 @@ app.use((req: Request, res: Response, next: NextFunction): void => {
   next();
 });
 
-// Application Routes
-app.use('/api/auth', authRouter);
-app.use('/api/users', userRouter);
-app.use('/api/hubspot', hubspotRouter);
+app.use('/api/auth', express.json(), authRouter);
+app.use('/api/users', express.json(), userRouter);
+app.use('/api/hubspot', express.json(), hubspotRouter);
+// Webhook route with raw body parsing for signature validation
+app.use('/api/webhook', express.raw({ type: 'application/json' }), webhookRouter);
 
 app.get('/', (req: Request, res: Response): void => {
   res.json({

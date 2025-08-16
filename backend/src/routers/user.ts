@@ -8,17 +8,17 @@ const userService = new UserService();
 
 router.post('/signup', async (req: Request, res: Response): Promise<void> => {
   try {
-    const { username, password } = req.body;
-    
-    if (!username || !password) {
+    const { username, password, user_account_id } = req.body;
+
+    if (!username || !password || !user_account_id) {
       res.status(400).json({
         success: false,
-        error: 'Username and password are required'
+        error: 'Username, password, and user_account_id are required'
       });
       return;
     }
-    
-    const result = await userService.createUser({ username, password });
+
+    const result = await userService.createUser({ username, password, user_account_id });
 
     res.status(201).json({
       success: true,

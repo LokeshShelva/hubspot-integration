@@ -14,6 +14,7 @@ interface Config {
     JWT_EXPIRES_IN: string;
     JWT_REFRESH_EXPIRES_IN: string;
     HUBSPOT_BASE: string | undefined;
+    WEBHOOK_URL: string | undefined;
 }
 
 const config: Config = {
@@ -28,7 +29,8 @@ const config: Config = {
     JWT_SECRET: process.env.JWT_SECRET,
     JWT_EXPIRES_IN: process.env.JWT_EXPIRES_IN || '7d',
     JWT_REFRESH_EXPIRES_IN: process.env.JWT_REFRESH_EXPIRES_IN || '30d',
-    HUBSPOT_BASE: process.env.HUBSPOT_BASE || 'https://api.hubapi.com'
+    HUBSPOT_BASE: process.env.HUBSPOT_BASE || 'https://api.hubapi.com',
+    WEBHOOK_URL: process.env.WEBHOOK_URL
 };
 
 const errors: string[] = [];

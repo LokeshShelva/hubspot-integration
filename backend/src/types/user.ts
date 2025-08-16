@@ -1,4 +1,4 @@
-import { Document, Model, Types } from 'mongoose';
+import { Document, Model, Types } from "mongoose";
 
 export interface IRefreshToken {
   token: string;
@@ -8,6 +8,7 @@ export interface IRefreshToken {
 export interface IUser {
   username: string;
   password: string;
+  user_account_id: string;
   refreshTokens: IRefreshToken[];
   isActive: boolean;
   lastLogin: Date | null;

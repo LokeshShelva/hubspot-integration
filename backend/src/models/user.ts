@@ -29,6 +29,11 @@ const userSchema = new Schema<IUser>({
     required: true,
     minlength: 6
   },
+  user_account_id: {
+    type: String,
+    required: true,
+    trim: true
+  },
   refreshTokens: [refreshTokenSchema],
   isActive: {
     type: Boolean,
@@ -113,6 +118,10 @@ userSchema.methods.updateLastLogin = function() {
 
 userSchema.statics.findByUsername = function(username: string) {
   return this.findOne({ username: username.toLowerCase(), isActive: true });
+};
+
+userSchema.statics.findByUserAccountId = function(userAccountId: string) {
+  return this.findOne({ user_account_id: userAccountId, isActive: true });
 };
 
 userSchema.statics.findByRefreshToken = function(token: string) {
