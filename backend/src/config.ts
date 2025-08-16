@@ -1,8 +1,22 @@
 import dotenv from 'dotenv';
 dotenv.config();
 
-const config = {
-    PORT: process.env.PORT || 3000,
+interface Config {
+    PORT: number;
+    CLIENT_ID: string | undefined;
+    CLIENT_SECRET: string | undefined;
+    REDIRECT_URI: string | undefined;
+    SCOPES: string | undefined;
+    TOKEN_URL: string | undefined;
+    ENCRYPTION_KEY: string | undefined;
+    MONGO_CONNECTION_STRING: string | undefined;
+    JWT_SECRET: string | undefined;
+    JWT_EXPIRES_IN: string;
+    JWT_REFRESH_EXPIRES_IN: string;
+}
+
+const config: Config = {
+    PORT: Number(process.env.PORT) || 3000,
     CLIENT_ID: process.env.CLIENT_ID,
     CLIENT_SECRET: process.env.CLIENT_SECRET,
     REDIRECT_URI: process.env.REDIRECT_URI,
@@ -15,9 +29,9 @@ const config = {
     JWT_REFRESH_EXPIRES_IN: process.env.JWT_REFRESH_EXPIRES_IN || '30d'
 };
 
-let errors = [];
+const errors: string[] = [];
 
-Object.keys(config).forEach(key => {
+(Object.keys(config) as Array<keyof Config>).forEach((key: keyof Config) => {
     const value = config[key];
     if (value === undefined || value === null) {
         errors.push(`Missing required environment variable: ${key}`);
@@ -32,3 +46,4 @@ if (errors.length > 0) {
 }
 
 export { config };
+export type { Config };

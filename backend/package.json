@@ -2,10 +2,11 @@
   "name": "hubspot-backend",
   "version": "1.0.0",
   "type": "module",
-  "main": "index.js",
+  "main": "src/main.ts",
   "scripts": {
-    "start": "node src/main.js",
-    "dev": "nodemon src/main.js -w src",
+    "start": "node --loader ts-node/esm src/main.ts",
+    "dev": "nodemon --exec \"node --loader ts-node/esm\" src/main.ts -w src -e ts,js",
+    "build": "tsc",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
@@ -20,6 +21,12 @@
     "mongoose": "^8.17.1"
   },
   "devDependencies": {
-    "nodemon": "^3.1.10"
+    "@types/crypto-js": "^4.2.2",
+    "@types/express": "^5.0.3",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/node": "^24.3.0",
+    "nodemon": "^3.1.10",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.2"
   }
 }

@@ -1,8 +1,22 @@
-import { Auth } from "../models/index.js";
+import Auth from "../models/auth.js";
 import { config } from "../config.js";
 import CryptoJS from "crypto-js";
+import type { 
+  IAuthDocument, 
+  IAuthModel, 
+  TokenData, 
+  EncryptedTokenData, 
+  HubSpotTokenResponse, 
+  DecryptedAuthData 
+} from "../types/auth.js";
 
 class AuthService {
+  private clientId: string | undefined;
+  private clientSecret: string | undefined;
+  private redirectUri: string | undefined;
+  private tokenUrl: string | undefined;
+  private encryptionKey: string | undefined;
+
   constructor() {
     this.clientId = config.CLIENT_ID;
     this.clientSecret = config.CLIENT_SECRET;
@@ -13,12 +27,15 @@ class AuthService {
 
   /**
    * Encrypts sensitive data using AES encryption
-   * @param {string} text - The text to encrypt
-   * @returns {string} - The encrypted text
+   * @param text - The text to encrypt
+   * @returns The encrypted text or null if input is falsy
    */
-  encryptToken(text) {
+  encryptToken(text: string | null | undefined): string | null {
     try {
       if (!text) return null;
+      if (!this.encryptionKey) {
+        throw new Error('Encryption key not configured');
+      }
       const encrypted = CryptoJS.AES.encrypt(text, this.encryptionKey).toString();
       return encrypted;
     } catch (error) {
@@ -29,12 +46,15 @@ class AuthService {
 
   /**
    * Decrypts sensitive data using AES decryption
-   * @param {string} encryptedText - The encrypted text to decrypt
-   * @returns {string} - The decrypted text
+   * @param encryptedText - The encrypted text to decrypt
+   * @returns The decrypted text or null if input is falsy
    */
-  decryptToken(encryptedText) {
+  decryptToken(encryptedText: string | null | undefined): string | null {
     try {
       if (!encryptedText) return null;
+      if (!this.encryptionKey) {
+        throw new Error('Encryption key not configured');
+      }
       const decrypted = CryptoJS.AES.decrypt(encryptedText, this.encryptionKey);
       return decrypted.toString(CryptoJS.enc.Utf8);
     } catch (error) {
@@ -45,31 +65,53 @@ class AuthService {
 
   /**
    * Encrypts token data before saving to database
-   * @param {Object} tokenData - Object containing access_token and refresh_token
-   * @returns {Object} - Object with encrypted tokens
+   * @param tokenData - Object containing access_token and refresh_token
+   * @returns Object with encrypted tokens
    */
-  encryptTokenData(tokenData) {
+  encryptTokenData(tokenData: TokenData): EncryptedTokenData {
+    const encryptedAccessToken = this.encryptToken(tokenData.access_token);
+    const encryptedRefreshToken = this.encryptToken(tokenData.refresh_token);
+    
+    if (!encryptedAccessToken || !encryptedRefreshToken) {
+      throw new Error('Failed to encrypt token data');
+    }
+
     return {
-      ...tokenData,
-      access_token: this.encryptToken(tokenData.access_token),
-      refresh_token: this.encryptToken(tokenData.refresh_token)
+      access_token: encryptedAccessToken,
+      refresh_token: encryptedRefreshToken
     };
   }
 
   /**
    * Decrypts token data after retrieving from database
-   * @param {Object} encryptedTokenData - Object containing encrypted tokens
-   * @returns {Object} - Object with decrypted tokens
+   * @param encryptedTokenData - Object containing encrypted tokens
+   * @returns Object with decrypted tokens
    */
-  decryptTokenData(encryptedTokenData) {
+  decryptTokenData(encryptedTokenData: EncryptedTokenData): TokenData {
+    const decryptedAccessToken = this.decryptToken(encryptedTokenData.access_token);
+    const decryptedRefreshToken = this.decryptToken(encryptedTokenData.refresh_token);
+    
+    if (!decryptedAccessToken || !decryptedRefreshToken) {
+      throw new Error('Failed to decrypt token data');
+    }
+
     return {
-      ...encryptedTokenData,
-      access_token: this.decryptToken(encryptedTokenData.access_token),
-      refresh_token: this.decryptToken(encryptedTokenData.refresh_token)
+      access_token: decryptedAccessToken,
+      refresh_token: decryptedRefreshToken
     };
   }
 
-  async createAccessToken(code, username) {
+  /**
+   * Creates an access token by exchanging authorization code
+   * @param code - Authorization code from OAuth flow
+   * @param username - Username to associate the token with
+   * @returns Updated auth record with new tokens
+   */
+  async createAccessToken(code: string, username: string): Promise<IAuthDocument> {
+    if (!this.clientId || !this.clientSecret || !this.redirectUri || !this.tokenUrl) {
+      throw new Error('OAuth configuration incomplete');
+    }
+
     const response = await fetch(this.tokenUrl, {
       method: 'POST',
       headers: {
@@ -88,7 +130,7 @@ class AuthService {
       throw new Error('Failed to exchange authorization code for access token');
     }
 
-    const tokenData = await response.json();
+    const tokenData = await response.json() as HubSpotTokenResponse;
 
     if (!tokenData.access_token) {
       throw new Error('Access token not found in response');
@@ -109,7 +151,7 @@ class AuthService {
     });
 
     // Use the createOrUpdate static method to handle upsert
-    const authToken = await Auth.createOrUpdate(
+    const authToken = await (Auth as any).createOrUpdate(
       username,
       encryptedTokenData.access_token,
       encryptedTokenData.refresh_token,
@@ -121,12 +163,16 @@ class AuthService {
 
   /**
    * Refreshes an access token using the refresh token
-   * @param {string} username - The username to refresh tokens for
-   * @returns {Object} - Updated auth record with new tokens
+   * @param username - The username to refresh tokens for
+   * @returns Updated auth record with new tokens
    */
-  async refreshAccessToken(username) {
+  async refreshAccessToken(username: string): Promise<IAuthDocument> {
+    if (!this.clientId || !this.clientSecret || !this.redirectUri || !this.tokenUrl) {
+      throw new Error('OAuth configuration incomplete');
+    }
+
     // Find the user's auth record
-    const authRecord = await Auth.findByUsername(username);
+    const authRecord = await (Auth as any).findByUsername(username);
     
     if (!authRecord) {
       throw new Error('Auth record not found for user');
@@ -134,6 +180,9 @@ class AuthService {
 
     // Decrypt the refresh token
     const decryptedRefreshToken = this.decryptToken(authRecord.refresh_token);
+    if (!decryptedRefreshToken) {
+      throw new Error('Failed to decrypt refresh token');
+    }
 
     const response = await fetch(this.tokenUrl, {
       method: 'POST',
@@ -153,7 +202,7 @@ class AuthService {
       throw new Error('Failed to refresh access token');
     }
 
-    const tokenData = await response.json();
+    const tokenData = await response.json() as HubSpotTokenResponse;
 
     if (!tokenData.access_token) {
       throw new Error('Access token not found in refresh response');
@@ -177,11 +226,11 @@ class AuthService {
 
   /**
    * Gets decrypted auth data for a user
-   * @param {string} username - The username to get auth data for
-   * @returns {Object} - Auth record with decrypted tokens
+   * @param username - The username to get auth data for
+   * @returns Auth record with decrypted tokens
    */
-  async getDecryptedAuthData(username) {
-    const authRecord = await Auth.findByUsername(username);
+  async getDecryptedAuthData(username: string): Promise<DecryptedAuthData> {
+    const authRecord = await (Auth as any).findByUsername(username);
     
     if (!authRecord) {
       throw new Error('Auth record not found for user');
@@ -202,11 +251,11 @@ class AuthService {
 
   /**
    * Validates if a token is expired and refreshes if needed
-   * @param {string} username - The username to validate tokens for
-   * @returns {Object} - Valid auth data with fresh tokens
+   * @param username - The username to validate tokens for
+   * @returns Valid auth data with fresh tokens
    */
-  async validateAndRefreshToken(username) {
-    const authRecord = await Auth.findByUsername(username);
+  async validateAndRefreshToken(username: string): Promise<IAuthDocument> {
+    const authRecord = await (Auth as any).findByUsername(username);
     
     if (!authRecord) {
       throw new Error('Auth record not found for user');
@@ -222,4 +271,5 @@ class AuthService {
   }
 }
 
-export {AuthService};
+export { AuthService };
+export default AuthService;

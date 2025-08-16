@@ -1,63 +1,81 @@
+import { Request, Response, NextFunction } from 'express';
 import { verifyToken, extractTokenFromHeader } from '../utils/jwt.js';
-import { User } from '../models/index.js';
+import User from '../models/user.js';
+
+// Extend the Express Request interface to include user property
+declare global {
+  namespace Express {
+    interface Request {
+      user?: {
+        userId: string;
+        username: string;
+        lastLogin: Date | null;
+      };
+    }
+  }
+}
 
 /**
  * Middleware to authenticate JWT tokens
  */
-export const authenticateToken = async (req, res, next) => {
+export const authenticateToken = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const authHeader = req.headers.authorization;
     const token = extractTokenFromHeader(authHeader);
 
     if (!token) {
-      return res.status(401).json({
+      res.status(401).json({
         success: false,
         error: 'Access token required',
         message: 'Please provide a valid access token in the Authorization header'
       });
+      return;
     }
 
     // Verify the token
     const decoded = verifyToken(token);
     
     // Find the user
-    const user = await User.findById(decoded.userId);
+    const user = await (User as any).findById(decoded.userId);
     if (!user || !user.isActive) {
-      return res.status(401).json({
+      res.status(401).json({
         success: false,
         error: 'Invalid token',
         message: 'User not found or inactive'
       });
+      return;
     }
 
     // Add user info to request
     req.user = {
-      userId: user._id,
+      userId: user._id.toString(),
       username: user.username,
       lastLogin: user.lastLogin
     };
 
     next();
-  } catch (error) {
+  } catch (error: any) {
     console.error('Authentication error:', error);
     
     if (error.message === 'Token has expired') {
-      return res.status(401).json({
+      res.status(401).json({
         success: false,
         error: 'Token expired',
         message: 'Your access token has expired. Please refresh your token.'
       });
+      return;
     }
     
     if (error.message === 'Invalid token') {
-      return res.status(401).json({
+      res.status(401).json({
         success: false,
         error: 'Invalid token',
         message: 'The provided token is invalid'
       });
+      return;
     }
 
-    return res.status(401).json({
+    res.status(401).json({
       success: false,
       error: 'Authentication failed',
       message: 'Token verification failed'
@@ -68,18 +86,18 @@ export const authenticateToken = async (req, res, next) => {
 /**
  * Optional authentication middleware - doesn't fail if no token
  */
-export const optionalAuthentication = async (req, res, next) => {
+export const optionalAuthentication = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const authHeader = req.headers.authorization;
     const token = extractTokenFromHeader(authHeader);
 
     if (token) {
       const decoded = verifyToken(token);
-      const user = await User.findById(decoded.userId);
+      const user = await (User as any).findById(decoded.userId);
       
       if (user && user.isActive) {
         req.user = {
-          userId: user._id,
+          userId: user._id.toString(),
           username: user.username,
           lastLogin: user.lastLogin
         };
@@ -96,13 +114,14 @@ export const optionalAuthentication = async (req, res, next) => {
 /**
  * Middleware to check if user is active
  */
-export const requireActiveUser = (req, res, next) => {
+export const requireActiveUser = (req: Request, res: Response, next: NextFunction): void => {
   if (!req.user) {
-    return res.status(401).json({
+    res.status(401).json({
       success: false,
       error: 'Authentication required',
       message: 'Please log in to access this resource'
     });
+    return;
   }
   
   next();

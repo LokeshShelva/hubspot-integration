@@ -1,7 +1,20 @@
-import mongoose from 'mongoose';
+import mongoose, { Schema } from 'mongoose';
 import bcrypt from 'bcryptjs';
+import { IUser, IUserDocument, IUserModel, IRefreshToken } from '../types/user.js';
 
-const userSchema = new mongoose.Schema({
+const refreshTokenSchema = new Schema<IRefreshToken>({
+  token: {
+    type: String,
+    required: true
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now,
+    expires: 2592000 // 30 days in seconds
+  }
+});
+
+const userSchema = new Schema<IUser>({
   username: {
     type: String,
     required: true,
@@ -16,17 +29,7 @@ const userSchema = new mongoose.Schema({
     required: true,
     minlength: 6
   },
-  refreshTokens: [{
-    token: {
-      type: String,
-      required: true
-    },
-    createdAt: {
-      type: Date,
-      default: Date.now,
-      expires: 2592000 // 30 days in seconds
-    }
-  }],
+  refreshTokens: [refreshTokenSchema],
   isActive: {
     type: Boolean,
     default: true
@@ -48,7 +51,6 @@ const userSchema = new mongoose.Schema({
   collection: 'users'
 });
 
-// Index for performance
 userSchema.index({ username: 1 });
 userSchema.index({ 'refreshTokens.token': 1 });
 
@@ -62,7 +64,7 @@ userSchema.pre('save', async function(next) {
       const salt = await bcrypt.genSalt(12);
       this.password = await bcrypt.hash(this.password, salt);
     } catch (error) {
-      return next(error);
+      return next(error as Error);
     }
   }
   
@@ -75,8 +77,7 @@ userSchema.pre('findOneAndUpdate', function(next) {
   next();
 });
 
-// Instance method to check password
-userSchema.methods.comparePassword = async function(candidatePassword) {
+userSchema.methods.comparePassword = async function(candidatePassword: string): Promise<boolean> {
   try {
     return await bcrypt.compare(candidatePassword, this.password);
   } catch (error) {
@@ -84,57 +85,52 @@ userSchema.methods.comparePassword = async function(candidatePassword) {
   }
 };
 
-// Instance method to add refresh token
-userSchema.methods.addRefreshToken = function(token) {
+userSchema.methods.addRefreshToken = function(token: string) {
   // Remove old tokens (keep only last 5)
   if (this.refreshTokens.length >= 5) {
     this.refreshTokens = this.refreshTokens.slice(-4);
   }
   
-  this.refreshTokens.push({ token });
+  this.refreshTokens.push({ token, createdAt: new Date() });
   return this.save();
 };
 
-// Instance method to remove refresh token
-userSchema.methods.removeRefreshToken = function(token) {
-  this.refreshTokens = this.refreshTokens.filter(rt => rt.token !== token);
+userSchema.methods.removeRefreshToken = function(token: string) {
+  this.refreshTokens = this.refreshTokens.filter((rt: any) => rt.token !== token);
   return this.save();
 };
 
-// Instance method to remove all refresh tokens
 userSchema.methods.removeAllRefreshTokens = function() {
   this.refreshTokens = [];
   return this.save();
 };
 
-// Instance method to update last login
 userSchema.methods.updateLastLogin = function() {
   this.lastLogin = new Date();
   this.updated_at = new Date();
   return this.save();
 };
 
-// Static method to find user by username
-userSchema.statics.findByUsername = function(username) {
+userSchema.statics.findByUsername = function(username: string) {
   return this.findOne({ username: username.toLowerCase(), isActive: true });
 };
 
-// Static method to find user by refresh token
-userSchema.statics.findByRefreshToken = function(token) {
+userSchema.statics.findByRefreshToken = function(token: string) {
   return this.findOne({ 
     'refreshTokens.token': token,
     isActive: true 
   });
 };
 
-// Remove password from JSON output
 userSchema.methods.toJSON = function() {
   const user = this.toObject();
-  delete user.password;
-  delete user.refreshTokens;
+  delete (user as any).password;
+  delete (user as any).refreshTokens;
   return user;
 };
 
 const User = mongoose.model('User', userSchema);
 
 export default User;
+export { User };
+export type { IUser, IUserDocument, IUserModel };

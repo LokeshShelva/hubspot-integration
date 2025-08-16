@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { Request, Response } from 'express';
 import { verifyToken } from '../utils/jwt.js';
 import { authenticateToken } from '../middleware/auth.js';
 import UserService from '../services/userService.js';
@@ -6,9 +6,17 @@ import UserService from '../services/userService.js';
 const router = express.Router();
 const userService = new UserService();
 
-router.post('/signup', async (req, res) => {
+router.post('/signup', async (req: Request, res: Response): Promise<void> => {
   try {
     const { username, password } = req.body;
+    
+    if (!username || !password) {
+      res.status(400).json({
+        success: false,
+        error: 'Username and password are required'
+      });
+      return;
+    }
     
     const result = await userService.createUser({ username, password });
 
@@ -18,15 +26,16 @@ router.post('/signup', async (req, res) => {
       data: result
     });
 
-  } catch (error) {
+  } catch (error: any) {
     console.error('Signup error:', error);
     
     if (error.code === 'USER_EXISTS' || error.code === 11000) {
-      return res.status(409).json({
+      res.status(409).json({
         success: false,
         error: 'Username already exists',
         message: error.message
       });
+      return;
     }
 
     res.status(400).json({
@@ -37,9 +46,17 @@ router.post('/signup', async (req, res) => {
   }
 });
 
-router.post('/login', async (req, res) => {
+router.post('/login', async (req: Request, res: Response): Promise<void> => {
   try {
     const { username, password } = req.body;
+    
+    if (!username || !password) {
+      res.status(400).json({
+        success: false,
+        error: 'Username and password are required'
+      });
+      return;
+    }
     
     const result = await userService.loginUser({ username, password });
 
@@ -49,15 +66,16 @@ router.post('/login', async (req, res) => {
       data: result
     });
 
-  } catch (error) {
+  } catch (error: any) {
     console.error('Login error:', error);
     
     if (error.code === 'INVALID_CREDENTIALS') {
-      return res.status(401).json({
+      res.status(401).json({
         success: false,
         error: 'Invalid credentials',
         message: error.message
       });
+      return;
     }
 
     res.status(400).json({
@@ -68,26 +86,28 @@ router.post('/login', async (req, res) => {
   }
 });
 
-router.post('/refresh', async (req, res) => {
+router.post('/refresh', async (req: Request, res: Response): Promise<void> => {
   try {
     const { refreshToken } = req.body;
 
-    if (!refreshToken) {
-      return res.status(400).json({
+    if (!refreshToken || typeof refreshToken !== 'string') {
+      res.status(400).json({
         success: false,
         error: 'Refresh token required',
         message: 'Please provide a refresh token'
       });
+      return;
     }
 
     try {
       verifyToken(refreshToken);
     } catch (error) {
-      return res.status(401).json({
+      res.status(401).json({
         success: false,
         error: 'Invalid refresh token',
         message: 'The refresh token is invalid or expired'
       });
+      return;
     }
 
     const result = await userService.refreshUserTokens(refreshToken);
@@ -98,15 +118,16 @@ router.post('/refresh', async (req, res) => {
       data: result
     });
 
-  } catch (error) {
+  } catch (error: any) {
     console.error('Token refresh error:', error);
     
     if (error.code === 'INVALID_REFRESH_TOKEN') {
-      return res.status(401).json({
+      res.status(401).json({
         success: false,
         error: 'Invalid refresh token',
         message: error.message
       });
+      return;
     }
 
     res.status(400).json({

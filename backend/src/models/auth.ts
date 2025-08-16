@@ -1,6 +1,7 @@
-import mongoose from 'mongoose';
+import mongoose, { Schema } from 'mongoose';
+import { IAuth, IAuthDocument, IAuthModel } from '../types/auth.js';
 
-const authSchema = new mongoose.Schema({
+const authSchema = new Schema<IAuth>({
   username: {
     type: String,
     required: true,
@@ -53,7 +54,8 @@ authSchema.pre('findOneAndUpdate', function(next) {
   next();
 });
 
-authSchema.methods.isTokenExpired = function() {
+// Instance method to check if token is expired
+authSchema.methods.isTokenExpired = function(): boolean {
   if (!this.refreshed_at) {
     // If never refreshed, check from created_at
     const expiryTime = new Date(this.created_at.getTime() + (this.expires_in * 1000));
@@ -66,7 +68,7 @@ authSchema.methods.isTokenExpired = function() {
 };
 
 // Instance method to update tokens
-authSchema.methods.updateTokens = function(accessToken, refreshToken, expiresIn) {
+authSchema.methods.updateTokens = function(accessToken: string, refreshToken: string, expiresIn: number) {
   this.access_token = accessToken;
   this.refresh_token = refreshToken;
   this.expires_in = expiresIn;
@@ -76,12 +78,12 @@ authSchema.methods.updateTokens = function(accessToken, refreshToken, expiresIn)
 };
 
 // Static method to find user by username
-authSchema.statics.findByUsername = function(username) {
+authSchema.statics.findByUsername = function(username: string) {
   return this.findOne({ username: username });
 };
 
 // Static method to create or update auth record
-authSchema.statics.createOrUpdate = function(username, accessToken, refreshToken, expiresIn) {
+authSchema.statics.createOrUpdate = function(username: string, accessToken: string, refreshToken: string, expiresIn: number) {
   return this.findOneAndUpdate(
     { username: username },
     {
@@ -100,6 +102,7 @@ authSchema.statics.createOrUpdate = function(username, accessToken, refreshToken
   );
 };
 
+// Indexes for performance
 authSchema.index({ username: 1 });
 authSchema.index({ created_at: 1 });
 authSchema.index({ updated_at: 1 });
@@ -107,3 +110,5 @@ authSchema.index({ updated_at: 1 });
 const Auth = mongoose.model('Auth', authSchema);
 
 export default Auth;
+export { Auth };
+export type { IAuth, IAuthDocument, IAuthModel };
