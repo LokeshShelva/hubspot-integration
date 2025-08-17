@@ -74,8 +74,8 @@ class WorkFlowService {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        candidate_name: properties.candidate_name,
-        candidate_number: properties.candidate_number,
+        Candidate_name: properties.candidate_name,
+        Candidate_number: properties.candidate_number,
       }),
     });
 
