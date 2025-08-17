@@ -194,6 +194,13 @@ Update an existing contact in HubSpot.
 ![update contact property](docs/attachments/update-contact-postman.png)
 ![update contact hubspot](docs/attachments/update-contact-hubspot.png)
 
-### Webhook trigger
+### Webhook trigger for contact creation
+
+Contact creation is a form of contact ownership change, so the webhook should trigger automatically.
 
 ![webhook trigger](docs/attachments/webhook-trigger.png)
+
+### Webhook trigger for contact owner change
+
+![contact owner change](docs/attachments/contact-owner-change.png)
+![contact owner change trigger](docs/attachments/contact-owner-change-trigger.png)
