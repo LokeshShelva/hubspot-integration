@@ -36,6 +36,8 @@ Below is the high level flow
 
 Create a hubspot account, if you do not have one already, and follow the steps below to test the application.
 
+Import the [postman collection](docs/attachments/hubspot-integration.postman_collection.json) and follow the steps below to test the application.
+
 ### Step 1: Create User Account
 
 **Postman Request:** `User > POST Create user`
@@ -173,3 +175,25 @@ Update an existing contact in HubSpot.
 **Purpose:** Refresh your JWT access token for the integration backend when it expires. This keeps your authentication with the backend API current.
 
 **When to use:** Use this when you get 401 unauthorized errors from the backend API.
+
+## Test Screenshots
+
+### Install the public app
+
+![install app](docs/attachments/install-app.png)
+![connected apps](docs/attachments/connected-apps.png)
+
+### Contact creation for a contact owner
+
+![create contact postman](docs/attachments/create-contact-postman.png)
+![contact hubspot](docs/attachments/contact-hubspot.png)
+![contact owner filter](docs/attachments/contact-owner-filter.png)
+
+### Update contact properties
+
+![update contact property](docs/attachments/update-contact-postman.png)
+![update contact hubspot](docs/attachments/update-contact-hubspot.png)
+
+### Webhook trigger
+
+![webhook trigger](docs/attachments/webhook-trigger.png)

@@ -1,0 +1,512 @@
+{
+	"info": {
+		"_postman_id": "4741b65e-8d7c-4642-80fc-ba482acad6ca",
+		"name": "HubSpot",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "28203864"
+	},
+	"item": [
+		{
+			"name": "User",
+			"item": [
+				{
+					"name": "Create user",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "username",
+									"value": "lokesh",
+									"type": "text"
+								},
+								{
+									"key": "password",
+									"value": "letmein",
+									"type": "text"
+								},
+								{
+									"key": "user_account_id",
+									"value": "243614350",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{baseURL}}/api/users/signup",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"api",
+								"users",
+								"signup"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "User Exists",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "urlencoded",
+									"urlencoded": [
+										{
+											"key": "username",
+											"value": "lokesh",
+											"type": "text"
+										},
+										{
+											"key": "password",
+											"value": "letmein",
+											"type": "text"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{baseURL}}/api/users/signup",
+									"host": [
+										"{{baseURL}}"
+									],
+									"path": [
+										"api",
+										"users",
+										"signup"
+									]
+								}
+							},
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [
+								{
+									"expires": "Invalid Date"
+								}
+							],
+							"body": "{\n    \"success\": false,\n    \"error\": \"User already exists\",\n    \"message\": \"A user with this username already exists\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Login",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "username",
+									"value": "lokesh",
+									"type": "text"
+								},
+								{
+									"key": "password",
+									"value": "letmein",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{baseURL}}/api/users/login",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"api",
+								"users",
+								"login"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Success",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "urlencoded",
+									"urlencoded": [
+										{
+											"key": "username",
+											"value": "lokesh",
+											"type": "text"
+										},
+										{
+											"key": "password",
+											"value": "letmein",
+											"type": "text"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{baseURL}}/api/users/login",
+									"host": [
+										"{{baseURL}}"
+									],
+									"path": [
+										"api",
+										"users",
+										"login"
+									]
+								}
+							},
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [
+								{
+									"expires": "Invalid Date"
+								}
+							],
+							"body": "{\n    \"success\": true,\n    \"message\": \"Login successful\",\n    \"data\": {\n        \"tokens\": {\n            \"accessToken\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OGEwNjdkYjBmMmFiYjdjNjAyYzI1YWQiLCJ1c2VybmFtZSI6Imxva2VzaCIsImlhdCI6MTc1NTM0Mzk4OCwiZXhwIjoxNzU1OTQ4Nzg4LCJhdWQiOiJodWJzcG90LWFwaSIsImlzcyI6Imh1YnNwb3QtaW50ZWdyYXRpb24ifQ.6cHax3GDhNLs2f2_UAu3U8WAgRhdiymLdkt_m-yvMe8\",\n            \"refreshToken\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OGEwNjdkYjBmMmFiYjdjNjAyYzI1YWQiLCJ1c2VybmFtZSI6Imxva2VzaCIsImlhdCI6MTc1NTM0Mzk4OCwiZXhwIjoxNzU3OTM1OTg4LCJhdWQiOiJodWJzcG90LWFwaSIsImlzcyI6Imh1YnNwb3QtaW50ZWdyYXRpb24ifQ.UvaOeiIjBHRpFw03KWqndqzWcrrhqrdf1mbcTDepfrQ\",\n            \"expiresIn\": \"7d\"\n        }\n    }\n}"
+						},
+						{
+							"name": "Wrong credential",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "urlencoded",
+									"urlencoded": [
+										{
+											"key": "username",
+											"value": "lokesh",
+											"type": "text"
+										},
+										{
+											"key": "password",
+											"value": "letmei",
+											"type": "text"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{baseURL}}/api/users/login",
+									"host": [
+										"{{baseURL}}"
+									],
+									"path": [
+										"api",
+										"users",
+										"login"
+									]
+								}
+							},
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [
+								{
+									"expires": "Invalid Date"
+								}
+							],
+							"body": "{\n    \"success\": false,\n    \"error\": \"Invalid credentials\",\n    \"message\": \"Invalid username or password\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Refresh token",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"refreshToken\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OGEwNjdkYjBmMmFiYjdjNjAyYzI1YWQiLCJ1c2VybmFtZSI6Imxva2VzaCIsImlhdCI6MTc1NTM0Mzk4OCwiZXhwIjoxNzU3OTM1OTg4LCJhdWQiOiJodWJzcG90LWFwaSIsImlzcyI6Imh1YnNwb3QtaW50ZWdyYXRpb24ifQ.UvaOeiIjBHRpFw03KWqndqzWcrrhqrdf1mbcTDepfrQ\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseURL}}/api/users/refresh",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"api",
+								"users",
+								"refresh"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "OAuth & Token Management",
+			"item": [
+				{
+					"name": "Generate OAuth Url",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OGExMWRiNWI0MmNhNGJhNjM1NzQ5ZTgiLCJ1c2VybmFtZSI6Imxva2VzaCIsImlhdCI6MTc1NTM4OTM2NiwiZXhwIjoxNzU1OTk0MTY2LCJhdWQiOiJodWJzcG90LWFwaSIsImlzcyI6Imh1YnNwb3QtaW50ZWdyYXRpb24ifQ.0LLCyX2tWJFYzPqthMhzIg55GwmIa1IdDqAvg6CVfig",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseURL}}/api/auth/generate",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"generate"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Refresh OAuth token",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OGExMWRiNWI0MmNhNGJhNjM1NzQ5ZTgiLCJ1c2VybmFtZSI6Imxva2VzaCIsImlhdCI6MTc1NTM5NzE1MCwiZXhwIjoxNzU2MDAxOTUwLCJhdWQiOiJodWJzcG90LWFwaSIsImlzcyI6Imh1YnNwb3QtaW50ZWdyYXRpb24ifQ.PmTcEmHAWGm4PpPsSBgIGahY8l7rMY9RNL68omiB34o",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseURL}}/api/auth/refresh",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"refresh"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Hubspot",
+			"item": [
+				{
+					"name": "Create contact",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OGExMWRiNWI0MmNhNGJhNjM1NzQ5ZTgiLCJ1c2VybmFtZSI6Imxva2VzaCIsImlhdCI6MTc1NTM4OTY3NCwiZXhwIjoxNzU1OTk0NDc0LCJhdWQiOiJodWJzcG90LWFwaSIsImlzcyI6Imh1YnNwb3QtaW50ZWdyYXRpb24ifQ.ZdKfUJYq0FMs2YaI-qHbfXOzSkITYliBD_vuPXHO_6s",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"contact_owner\": \"5shelva19@gmail.com\",\r\n    \"properties\": {\r\n        \"firstname\": \"John\",\r\n        \"email\": \"John.doe@nurix.ai\",\r\n        \"candidate_experience\": 8,\r\n        \"candidate_date_of_joining\": \"2025-05-10\",\r\n        \"candidate_name\": \"John Doe\",\r\n        \"candidate_past_company\": \"Flipkart\",\r\n        \"candidate_number\": \"+91987654321\"\r\n    }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseURL}}/api/hubspot/contacts",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"api",
+								"hubspot",
+								"contacts"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update contact",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OGExMWRiNWI0MmNhNGJhNjM1NzQ5ZTgiLCJ1c2VybmFtZSI6Imxva2VzaCIsImlhdCI6MTc1NTM4OTY3NCwiZXhwIjoxNzU1OTk0NDc0LCJhdWQiOiJodWJzcG90LWFwaSIsImlzcyI6Imh1YnNwb3QtaW50ZWdyYXRpb24ifQ.ZdKfUJYq0FMs2YaI-qHbfXOzSkITYliBD_vuPXHO_6s",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\": \"john.doe@nurix.ai\",\r\n    \"properties\": {\r\n        \"candidate_experience\": 2\r\n    }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseURL}}/api/hubspot/contacts/properties",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"api",
+								"hubspot",
+								"contacts",
+								"properties"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create custom properties",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OGEwNjdkYjBmMmFiYjdjNjAyYzI1YWQiLCJ1c2VybmFtZSI6Imxva2VzaCIsImlhdCI6MTc1NTM0MzA1NSwiZXhwIjoxNzU1OTQ3ODU1LCJhdWQiOiJodWJzcG90LWFwaSIsImlzcyI6Imh1YnNwb3QtaW50ZWdyYXRpb24ifQ.GpDNauNZAdaSDATt6FNNUQ7loGMHGSkT4jmMuGubU3k",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"inputs\": [\r\n    {\r\n      \"name\": \"candidate_experience\",\r\n      \"label\": \"Candidate Experience\",\r\n      \"description\": \"Years of experience for the candidate\",\r\n      \"groupName\": \"contactinformation\",\r\n      \"type\": \"number\",\r\n      \"fieldType\": \"number\",\r\n      \"displayOrder\": 2,\r\n      \"hidden\": false\r\n    },\r\n    {\r\n      \"name\": \"candidate_date_of_joining\",\r\n      \"label\": \"Candidate Date of Joining\",\r\n      \"description\": \"Date when the candidate joined\",\r\n      \"groupName\": \"contactinformation\",\r\n      \"type\": \"date\",\r\n      \"fieldType\": \"date\",\r\n      \"displayOrder\": 3,\r\n      \"hidden\": false\r\n    },\r\n    {\r\n      \"name\": \"candidate_name\",\r\n      \"label\": \"Candidate Name\",\r\n      \"description\": \"Name of the candidate\",\r\n      \"groupName\": \"contactinformation\",\r\n      \"type\": \"string\",\r\n      \"fieldType\": \"text\",\r\n      \"displayOrder\": 4,\r\n      \"hidden\": false\r\n    },\r\n    {\r\n      \"name\": \"candidate_past_company\",\r\n      \"label\": \"Candidate Past Company\",\r\n      \"description\": \"Previous company where the candidate worked\",\r\n      \"groupName\": \"contactinformation\",\r\n      \"type\": \"string\",\r\n      \"fieldType\": \"text\",\r\n      \"displayOrder\": 5,\r\n      \"hidden\": false\r\n    },\r\n    {\r\n      \"name\": \"candidate_number\",\r\n      \"label\": \"Candidate Phone Number\",\r\n      \"description\": \"The Phone number of the candidate\",\r\n      \"groupName\": \"contactinformation\",\r\n      \"type\": \"string\",\r\n      \"fieldType\": \"text\",\r\n      \"displayOrder\": 5,\r\n      \"hidden\": false\r\n    }\r\n  ]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseURL}}/api/hubspot/contacts/properties",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"api",
+								"hubspot",
+								"contacts",
+								"properties"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Health",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseURL}}/health",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"health"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Webhook test",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OGEwNjdkYjBmMmFiYjdjNjAyYzI1YWQiLCJ1c2VybmFtZSI6Imxva2VzaCIsImlhdCI6MTc1NTM0MzA1NSwiZXhwIjoxNzU1OTQ3ODU1LCJhdWQiOiJodWJzcG90LWFwaSIsImlzcyI6Imh1YnNwb3QtaW50ZWdyYXRpb24ifQ.GpDNauNZAdaSDATt6FNNUQ7loGMHGSkT4jmMuGubU3k",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "X-HubSpot-Signature",
+						"value": "82c30d422ad46e07cb4c3f70237275b78e71424cd9130256214988a4b0973490",
+						"type": "text"
+					},
+					{
+						"key": "X-HubSpot-Signature-Version",
+						"value": "v1",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "[\r\n  {\r\n    \"eventId\": 3471990322,\r\n    \"subscriptionId\": 4107028,\r\n    \"portalId\": 243614350,\r\n    \"appId\": 17983385,\r\n    \"occurredAt\": 1755385292875,\r\n    \"subscriptionType\": \"contact.propertyChange\",\r\n    \"attemptNumber\": 0,\r\n    \"objectId\": 210778405585,\r\n    \"propertyName\": \"hubspot_owner_id\",\r\n    \"propertyValue\": \"82467795\",\r\n    \"changeSource\": \"CRM_UI\",\r\n    \"sourceId\": \"userId:82467795\"\r\n  }\r\n]",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseURL}}/api/webhook/contactownerchange",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"api",
+						"webhook",
+						"contactownerchange"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
