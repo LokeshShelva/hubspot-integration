@@ -5,6 +5,12 @@ import authRouter from './routers/auth.js';
 import userRouter from './routers/user.js';
 import hubspotRouter from './routers/hubspot.js';
 import webhookRouter from './routers/webhook.js';
+import { readFileSync } from 'fs';
+import { join, dirname } from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 const app = express();
 const PORT: number = Number(config.PORT);
@@ -25,11 +31,22 @@ app.use('/api/hubspot', express.json(), hubspotRouter);
 app.use('/api/webhook', express.raw({ type: 'application/json' }), webhookRouter);
 
 app.get('/', (req: Request, res: Response): void => {
-  res.json({
-    message: 'Welcome to the HubSpot Integration API',
-    version: '1.0.0',
-    timestamp: new Date().toISOString()
-  });
+  try {
+    const htmlPath = join(__dirname, 'templates', 'index.html');
+    const html = readFileSync(htmlPath, 'utf8');
+    
+    res.setHeader('Content-Type', 'text/html');
+    res.send(html);
+  } catch (error) {
+    // Fallback to JSON if HTML file can't be read
+    console.warn("Could not read index.html, falling back to JSON response:", error);
+    res.json({
+      message: 'Welcome to the HubSpot Integration API',
+      version: '1.0.0',
+      timestamp: new Date().toISOString(),
+      github: 'https://github.com/LokeshShelva/hubspot-integration'
+    });
+  }
 });
 
 app.get('/health', (req: Request, res: Response): void => {

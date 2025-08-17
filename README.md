@@ -1,5 +1,7 @@
 # HubSpot Integration API
 
+> **⚠️ DEVELOPMENT ONLY WARNING**: This application is intended for development and demonstration purposes only. Do not use in production environments or with real customer data. Use test accounts and dummy data only.
+
 A comprehensive Node.js API service for integrating with HubSpot CRM. 
 
 ## Features
@@ -9,6 +11,28 @@ A comprehensive Node.js API service for integrating with HubSpot CRM.
 - **Property Updates**: Update custom properties on existing contacts
 - **Webhook Integration**: Automated workflow triggers when contact ownership changes
 - **Authentication**: Secure JWT-based authentication system
+
+## ⚠️ Important Development Notice
+
+**This application is for development and demonstration purposes only.**
+
+### Do NOT use for:
+- Production environments
+- Real customer data
+- Live business operations
+- Storing sensitive information
+
+### Intended for:
+- Learning HubSpot API integration
+- Testing and development
+- Proof of concept demonstrations
+- Educational purposes
+
+### Recommendations:
+- Use test HubSpot accounts only
+- Use dummy/fake data for testing
+- Do not connect to production HubSpot portals
+- Review and understand the code before use
 
 ## Tech Stack
 
@@ -27,6 +51,8 @@ A comprehensive Node.js API service for integrating with HubSpot CRM.
 If you want to run locally. follow the [Development Setup Guide](docs/dev-setup.md) for detailed instructions on setting up the development environment.
 
 The app is also deployed on Vercel, and you can access it at [https://hubspot-integration-nu.vercel.app](https://hubspot-integration-nu.vercel.app).
+
+Visit the landing page to get an overview of the application features and quick access to documentation.
 
 ### Testing Flow
 
