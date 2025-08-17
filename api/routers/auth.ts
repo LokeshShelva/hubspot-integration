@@ -2,6 +2,12 @@ import express, { Request, Response } from "express";
 import { config } from "../config.js";
 import { AuthService } from "../services/authService.js";
 import { authenticateToken } from "../middleware/auth.js";
+import { readFileSync } from "fs";
+import { join, dirname } from "path";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 const router = express.Router();
 const authService = new AuthService();
@@ -42,45 +48,108 @@ router.get("/callback", async (req: Request, res: Response): Promise<void> => {
 
   if (error) {
     console.error("OAuth error:", error);
-    res.status(400).json({
-      success: false,
-      error: "OAuth authorization failed",
-      details: error,
-    });
+    
+    // Serve error HTML page
+    try {
+      const htmlPath = join(__dirname, '..', 'templates', 'error.html');
+      let html = readFileSync(htmlPath, 'utf8');
+      html = html.replace('{{ERROR_MESSAGE}}', `OAuth authorization failed: ${error}`);
+      
+      res.setHeader('Content-Type', 'text/html');
+      res.status(400).send(html);
+    } catch (fileError) {
+      // Fallback to JSON if HTML file can't be read
+      console.warn("Could not read error.html, falling back to JSON response:", fileError);
+      res.status(400).json({
+        success: false,
+        error: "OAuth authorization failed",
+        details: error,
+      });
+    }
     return;
   }
 
   if (!code || typeof code !== 'string') {
-    res.status(400).json({
-      success: false,
-      error: "Authorization code is required",
-    });
+    // Serve error HTML page
+    try {
+      const htmlPath = join(__dirname, '..', 'templates', 'error.html');
+      let html = readFileSync(htmlPath, 'utf8');
+      html = html.replace('{{ERROR_MESSAGE}}', 'Authorization code is required');
+      
+      res.setHeader('Content-Type', 'text/html');
+      res.status(400).send(html);
+    } catch (fileError) {
+      // Fallback to JSON if HTML file can't be read
+      console.warn("Could not read error.html, falling back to JSON response:", fileError);
+      res.status(400).json({
+        success: false,
+        error: "Authorization code is required",
+      });
+    }
     return;
   }
 
   if (!state || typeof state !== 'string') {
-    res.status(400).json({
-      success: false,
-      error: "State parameter is required",
-    });
+    // Serve error HTML page
+    try {
+      const htmlPath = join(__dirname, '..', 'templates', 'error.html');
+      let html = readFileSync(htmlPath, 'utf8');
+      html = html.replace('{{ERROR_MESSAGE}}', 'State parameter is required');
+      
+      res.setHeader('Content-Type', 'text/html');
+      res.status(400).send(html);
+    } catch (fileError) {
+      // Fallback to JSON if HTML file can't be read
+      console.warn("Could not read error.html, falling back to JSON response:", fileError);
+      res.status(400).json({
+        success: false,
+        error: "State parameter is required",
+      });
+    }
     return;
   }
 
   try {
     // Use the authenticated user's username instead of 'testuser'
     await authService.createAccessToken(code, state);
-    res.json({
-      success: true,
-      message: "Access token created successfully",
-      user: state
-    });
+    
+    // Serve success HTML page
+    try {
+      const htmlPath = join(__dirname, '..', 'templates', 'success.html');
+      let html = readFileSync(htmlPath, 'utf8');
+      html = html.replace('{{USER_ID}}', state);
+      
+      res.setHeader('Content-Type', 'text/html');
+      res.send(html);
+    } catch (fileError) {
+      // Fallback to JSON if HTML file can't be read
+      console.warn("Could not read success.html, falling back to JSON response:", fileError);
+      res.json({
+        success: true,
+        message: "Access token created successfully",
+        user: state
+      });
+    }
   } catch (error: any) {
     console.error("OAuth callback error:", error);
-    res.status(500).json({
-      success: false,
-      error: "Failed to process OAuth callback",
-      details: error.message,
-    });
+    
+    // Serve error HTML page
+    try {
+      const htmlPath = join(__dirname, '..', 'templates', 'error.html');
+      let html = readFileSync(htmlPath, 'utf8');
+      html = html.replace('{{ERROR_MESSAGE}}', `Failed to process OAuth callback: ${error.message}`);
+      
+      res.setHeader('Content-Type', 'text/html');
+      res.status(500).send(html);
+    } catch (fileError) {
+      // Fallback to JSON if HTML file can't be read
+      console.warn("Could not read error.html, falling back to JSON response:", fileError);
+      res.status(500).json({
+        success: false,
+        error: "Failed to process OAuth callback",
+        details: error.message,
+      });
+    }
   }
 });
 
