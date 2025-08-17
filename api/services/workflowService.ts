@@ -103,6 +103,12 @@ class WorkFlowService {
       throw new Error("Auth record not found for user");
     }
 
+    const is_expired = authRecord.isTokenExpired();
+    if (is_expired) {
+      const result = await this.authService.refreshAccessToken(user.username);
+      return result.access_token;
+    }
+
     const access_token = this.authService.decryptToken(authRecord.access_token);
     if (!access_token) {
       throw new Error("Failed to decrypt access token");
