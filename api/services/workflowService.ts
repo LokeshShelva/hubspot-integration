@@ -38,7 +38,6 @@ class WorkFlowService {
     const signature = headers['x-hubspot-signature'];
     const validationString = config.CLIENT_SECRET?.toString().trim() + requestBody;
     const expectedSignature = CryptoJS.SHA256(validationString).toString();
-    console.error('Expected Signature:', expectedSignature);
 
     return signature === expectedSignature;
   }
